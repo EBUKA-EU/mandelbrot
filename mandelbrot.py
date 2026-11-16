@@ -39,3 +39,24 @@ def escape_iterations(c, max_iter):
         if abs(z) > 2:
             return i 
     return None 
+
+
+def pixel_to_complex(x, y, width, height):
+    """Map 2D pixel coordinates (x, y) to a point on the complex plane.
+
+    Scales screen coordinates within a (width x height) viewport to the default
+    Mandelbrot viewing region (real: [-2.0, 1.0], imag: [-1.5, 1.5]),
+    inverting the y-axis.
+    """
+    real_min, real_max = -2.0, 1.0
+    imag_min, imag_max = -1.5, 1.5
+
+    # Calculate real
+    real = real_min + (x/(width - 1))*(real_max - real_min)
+
+    # Calculate imag
+    imag = imag_max - (y/(height - 1))*(imag_max - imag_min)
+
+    # Return a complex number
+    return complex(real, imag)
+
