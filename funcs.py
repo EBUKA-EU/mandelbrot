@@ -13,7 +13,6 @@ def next_z(z, c):
     """
     return z**2 + c
 
-
 def escape_iterations(c, max_iter):
     """Calculates the escape time for a complex number in the Mandelbrot set.
 
@@ -39,7 +38,6 @@ def escape_iterations(c, max_iter):
         if abs(z) > 2:
             return i 
     return None 
-
 
 def pixel_to_complex(x, y, width, height):
     """Map 2D pixel coordinates (x, y) to a point on the complex plane.
