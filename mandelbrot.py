@@ -24,10 +24,15 @@ def draw_mandelbrot():
             # Convert this pixel into a complex number
             c = pixel_to_complex(x, y, width, height)
 
-            # Calculate the escape time
-            escape = escape_iterations(c, max_iter)
-            # Colour points based on whether they escaped the Mandelbrot set
-            color = escape_to_color(escape=escape)
+            try:
+                # Calculate the escape time
+                escape = escape_iterations(c, max_iter)
+                # Colour points based on whether they escaped the Mandelbrot set
+                color = escape_to_color(escape, max_iter)
+            except ValueError as e:
+                print(f"Error: {e}")
+                root.destroy()
+                return
 
             # Write color to pixel
             image.put(color, to=(x, y))

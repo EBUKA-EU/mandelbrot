@@ -31,6 +31,11 @@ def escape_iterations(c, max_iter):
         iterations.
     """
     z = 0
+
+    # Validate iteration count
+    if max_iter <= 0 or not isinstance(max_iter, int):
+        raise ValueError("Iteration count must be a positive integer")
+        
     for i in range(1, max_iter + 1):
         # calculate the next value of z, because c remains constant throughout the loop
         z = next_z(z, c)
@@ -58,21 +63,36 @@ def pixel_to_complex(x, y, width, height):
     # Return a complex number
     return complex(real, imag)
 
-def escape_to_color(escape):
+def escape_to_color(escape, max_iter):
     """
-    Convert a Mandelbrot escape-time result into a colour.
+    Convert a Mandelbrot escape-time result into an RGB gradient color.
 
     Args:
         escape (int | None): Number of iterations before escape,
                              or None if no escape was detected.
+        max_iter(int): Maximum number of iterations
+
     Returns:
-        str: A Tkinter-compatible colour name.
+        str: A Tkinter-compatible hexadecimal colour.
     """
     if escape is None:
-        return "black"
-    elif escape <= 5:
-        return "red"
-    elif escape <= 20:
-        return "orange"
-    else:
-        return "blue"
+        return "#000000"
+
+    # Validate iteration count
+    if max_iter <= 0 or not isinstance(max_iter, int):
+        raise ValueError("Iteration count must be a positive integer")
+    
+    # Normalize escape time to a value between 0 and 1
+    norm_escape = escape / max_iter
+
+    # Calculate the intensity of RGB channels
+    red = int(round(255 * (1 - norm_escape)))
+    green = 0
+    blue = int(round(255 * norm_escape))
+
+    # Convert to a hex value
+    hex_color = f"#{red:02x}{green:02x}{blue:02x}"
+
+    return hex_color
+
+
