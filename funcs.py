@@ -58,3 +58,21 @@ def pixel_to_complex(x, y, width, height):
     # Return a complex number
     return complex(real, imag)
 
+def escape_to_color(escape):
+    """
+    Convert a Mandelbrot escape-time result into a colour.
+
+    Args:
+        escape (int | None): Number of iterations before escape,
+                             or None if no escape was detected.
+    Returns:
+        str: A Tkinter-compatible colour name.
+    """
+    if escape is None:
+        return "black"
+    elif escape <= 5:
+        return "red"
+    elif escape <= 20:
+        return "orange"
+    else:
+        return "blue"

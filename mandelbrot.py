@@ -1,9 +1,9 @@
 import tkinter as tk
-from funcs import escape_iterations, pixel_to_complex
+from funcs import escape_iterations, pixel_to_complex, escape_to_color
 
 def draw_mandelbrot():
     """
-        Render a black-and-white Mandelbrot set in a Tkinter window
+        Render a color-based Mandelbrot set in a Tkinter window based on escape time
     """
     width = 180
     height = 180
@@ -27,7 +27,7 @@ def draw_mandelbrot():
             # Calculate the escape time
             escape = escape_iterations(c, max_iter)
             # Colour points based on whether they escaped the Mandelbrot set
-            color = "white" if escape is not None else "black"
+            color = escape_to_color(escape=escape)
 
             # Write color to pixel
             image.put(color, to=(x, y))
