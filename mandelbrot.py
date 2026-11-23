@@ -1,16 +1,17 @@
 import tkinter as tk
-from funcs import escape_iterations, pixel_to_complex, escape_to_color
+from funcs import render_mandelbrot_rows
 
 def draw_mandelbrot():
     """
         Render a color-based Mandelbrot set in a Tkinter window based on escape time
     """
-    width = 180
-    height = 180
+    width = 500
+    height = 500
     max_iter = 100
 
     root = tk.Tk()
     root.title("Mandelbrot Explorer")
+    root.geometry("800x800")
 
     # Create and pack a Canvas
     canvas = tk.Canvas(root, width=width, height=height, background="white")
@@ -19,23 +20,7 @@ def draw_mandelbrot():
     # Create a PhotoImage matching the canvas dimensions
     image = tk.PhotoImage(width=width, height=height)
 
-    for y in range(height):
-        for x in range(width):
-            # Convert this pixel into a complex number
-            c = pixel_to_complex(x, y, width, height)
-
-            try:
-                # Calculate the escape time
-                escape = escape_iterations(c, max_iter)
-                # Colour points based on whether they escaped the Mandelbrot set
-                color = escape_to_color(escape, max_iter)
-            except ValueError as e:
-                print(f"Error: {e}")
-                root.destroy()
-                return
-
-            # Write color to pixel
-            image.put(color, to=(x, y))
+    render_mandelbrot_rows(image,width,height,max_iter)
 
     # Display the PhotoImage to the Canvas
     canvas.create_image(0,0,image=image, anchor="nw")
@@ -43,6 +28,7 @@ def draw_mandelbrot():
     canvas.image = image
 
     root.mainloop()
+
 
 if __name__ == "__main__":
     draw_mandelbrot()

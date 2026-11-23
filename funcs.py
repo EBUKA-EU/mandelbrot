@@ -95,4 +95,31 @@ def escape_to_color(escape, max_iter):
 
     return hex_color
 
+def render_mandelbrot_rows(image,width,height,max_iter):
+    """
+    Render Mandelbrot colours into a PhotoImage one row at a time.
 
+    Args:
+        image (tk.PhotoImage): Image to populate.
+        width (int): Image width in pixels.
+        height (int): Image height in pixels.
+        max_iter (int): Maximum Mandelbrot iterations.
+    """
+    for y in range(height):
+        row_colors = []
+        for x in range(width):
+            # Convert this pixel into a complex number
+            c = pixel_to_complex(x, y, width, height)
+
+            try:
+                escape = escape_iterations(c, max_iter)
+                color = escape_to_color(escape, max_iter)
+            except ValueError as e:
+                print(f"Error: {e}")
+                return
+            row_colors.append(color)
+        # Join row colors into a Tk-compatible row string
+        row_data = "{" + " ".join(row_colors) + "}"
+
+        # Write the entire row to image
+        image.put(row_data, to=(0, y))
