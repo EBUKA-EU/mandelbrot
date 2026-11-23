@@ -44,16 +44,25 @@ def escape_iterations(c, max_iter):
             return i 
     return None 
 
-def pixel_to_complex(x, y, width, height):
-    """Map 2D pixel coordinates (x, y) to a point on the complex plane.
-
-    Scales screen coordinates within a (width x height) viewport to the default
-    Mandelbrot viewing region (real: [-2.0, 1.0], imag: [-1.5, 1.5]),
-    inverting the y-axis.
+def pixel_to_complex(x, y, width, height, real_min, real_max, imag_min, imag_max):
     """
-    real_min, real_max = -2.0, 1.0
-    imag_min, imag_max = -1.5, 1.5
+    Convert a pixel coordinate to a complex number
+    within the specified viewing boundaries.
 
+    Args:
+        x (int): Horizontal pixel coordinate.
+        y (int): Vertical pixel coordinate.
+        width (int): Image width in pixels.
+        height (int): Image height in pixels.
+        real_min (float): Minimum real coordinate.
+        real_max (float): Maximum real coordinate.
+        imag_min (float): Minimum imaginary coordinate.
+        imag_max (float): Maximum imaginary coordinate.
+
+    Returns:
+        complex: The corresponding complex-plane coordinate.
+    """
+   
     # Calculate real
     real = real_min + (x/(width - 1))*(real_max - real_min)
 
@@ -142,5 +151,42 @@ def handle_click(event):
     print(f"Pixel coords: ({event.x}, {event.y})")
     print(f"Screen coords: ({event.x_root}, {event.y_root})")
 
+def calculate_zoom_bounds(center, real_min, real_max, imag_min, imag_max, zoom_factor):
+    """
+    Calculate new complex-plane boundaries after zooming.
 
+    Args:
+        center (complex): Complex number at the zoom centre.
+        real_min (float): Current minimum real coordinate.
+        real_max (float): Current maximum real coordinate.
+        imag_min (float): Current minimum imaginary coordinate.
+        imag_max (float): Current maximum imaginary coordinate.
+        zoom_factor (float): Scale factor greater than zero.
+                             Values above 1 zoom in.
+
+    Returns:
+        tuple: (new_real_min, new_real_max,
+                new_imag_min, new_imag_max)
+    """
+    if zoom_factor <= 0:
+        raise ValueError("Zoom factor must be greater than zero")
+
+    # Calculate the current real and imag spans
+    real_span = real_max - real_min
+    imag_span = imag_max - imag_min
+
+    # Divide each span by zoom_factor and by 2 
+    # to obatin the new half-width and half-height
+
+    half_real_span = (real_span / zoom_factor) / 2
+    half_imag_span = (imag_span / zoom_factor) / 2
+
+    # Calculate the new boundaries around center.real and center.imag
+    new_real_min = center.real - half_real_span
+    new_real_max = center.real + half_real_span
+
+    new_imag_min = center.imag - half_imag_span
+    new_imag_max = center.imag + half_imag_span
+
+    return (new_real_min, new_real_max, new_imag_min, new_imag_max)
 
