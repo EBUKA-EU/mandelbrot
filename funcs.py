@@ -96,6 +96,7 @@ def escape_to_color(escape, max_iter):
     return hex_color
 
 def render_mandelbrot_rows(image,width,height,max_iter):
+
     """
     Render Mandelbrot colours into a PhotoImage one row at a time.
 
@@ -111,15 +112,35 @@ def render_mandelbrot_rows(image,width,height,max_iter):
             # Convert this pixel into a complex number
             c = pixel_to_complex(x, y, width, height)
 
-            try:
-                escape = escape_iterations(c, max_iter)
-                color = escape_to_color(escape, max_iter)
-            except ValueError as e:
-                print(f"Error: {e}")
-                return
+            escape = escape_iterations(c, max_iter)
+            color = escape_to_color(escape, max_iter)
+            
             row_colors.append(color)
         # Join row colors into a Tk-compatible row string
         row_data = "{" + " ".join(row_colors) + "}"
 
         # Write the entire row to image
         image.put(row_data, to=(0, y))
+
+def handle_click(event):
+    """
+    Handle a left mouse click on the Mandelbrot Canvas.
+
+    Args:
+        event: Tkinter mouse event containing click coordinates.
+    """
+    # Get the pixel coordinte from the event
+    x = event.x
+    y = event.y
+    width = event.x_root
+    height = event.y_root
+
+    # Convert to complex number
+    c = pixel_to_complex(x, y, width, height)
+
+    print(f"Complex value: {c}")
+    print(f"Pixel coords: ({event.x}, {event.y})")
+    print(f"Screen coords: ({event.x_root}, {event.y_root})")
+
+
+

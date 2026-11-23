@@ -1,5 +1,5 @@
 import tkinter as tk
-from funcs import render_mandelbrot_rows
+from funcs import render_mandelbrot_rows,pixel_to_complex
 
 def draw_mandelbrot():
     """
@@ -26,6 +26,27 @@ def draw_mandelbrot():
     canvas.create_image(0,0,image=image, anchor="nw")
     # Keep a reference to the image
     canvas.image = image
+
+    def handle_click(event):
+        """
+        Handle a left mouse click on the Mandelbrot Canvas.
+
+        Args:
+            event: Tkinter mouse event containing click coordinates.
+        
+        Print the complex coordinate of a Canvas click.
+        """
+        # Get the pixel coordinte from the event
+        x = event.x
+        y = event.y
+
+        # Convert to complex number
+        c = pixel_to_complex(x, y, width, height)
+
+        print(f"Pixel coords: ({x}, {y})")
+        print(f"Complex value: {c}")
+
+    canvas.bind("<Button-1>", handle_click)
 
     root.mainloop()
 
