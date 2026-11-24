@@ -9,7 +9,9 @@ def draw_mandelbrot():
     height = 500
     max_iter = 100
 
-    bounds = (-2.0, 1.0, -1.5, 1.5)
+    initial_bounds = (-2.0, 1.0, -1.5, 1.5)
+    bounds = initial_bounds
+
 
     root = tk.Tk()
     root.title("Mandelbrot Explorer")
@@ -50,6 +52,42 @@ def draw_mandelbrot():
 
     canvas.bind("<Button-1>", handle_click)
 
+    def handle_right_click(event):
+        """
+        Zoom out around the complex coordinate selected by the user.
+
+        Args:
+            event: Tkinter right-click mouse event.
+        """
+        nonlocal bounds
+
+        # Convert the clicked corrdinates into complex number
+        center = pixel_to_complex(event.x, event.y, width, height, *bounds)
+
+        # Calculate new bounds using zoomfactor=0.5
+        bounds = calculate_zoom_bounds(center, *bounds, zoom_factor=0.5)
+
+        render_mandelbrot_rows(image, width, height, max_iter, bounds)
+
+    canvas.bind("<Button-3>", handle_right_click)
+
+    def reset_view():
+        """
+        Restore the original Mandelbrot viewing boundaries
+        and redraw the image.
+        """
+        nonlocal bounds
+
+        # Restore the initial boundaries
+        bounds = initial_bounds
+
+        # Redraw the mandelbrot image
+        render_mandelbrot_rows(image, width, height, max_iter, bounds)
+
+    # Create a reset button
+    reset_button = tk.Button(root, text="Reset View", command=reset_view)
+    reset_button.pack()
+    
     root.mainloop()
 
 
