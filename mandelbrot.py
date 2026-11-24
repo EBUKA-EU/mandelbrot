@@ -1,5 +1,5 @@
 import tkinter as tk
-from funcs import render_mandelbrot_rows,pixel_to_complex
+from funcs import render_mandelbrot_rows, pixel_to_complex, calculate_zoom_bounds
 
 def draw_mandelbrot():
     """
@@ -31,22 +31,22 @@ def draw_mandelbrot():
 
     def handle_click(event):
         """
-        Handle a left mouse click on the Mandelbrot Canvas.
+        Zoom into the Mandelbrot set around a clicked location.
 
         Args:
-            event: Tkinter mouse event containing click coordinates.
-        
-        Print the complex coordinate of a Canvas click.
+        event: Tkinter mouse event containing click coordinates.
         """
-        # Get the pixel coordinte from the event
-        x = event.x
-        y = event.y
+        nonlocal bounds
 
-        # Convert to complex number
-        c = pixel_to_complex(x, y, width, height, *bounds)
+        # Convert the clicked pixel into complex number
+        center = pixel_to_complex(event.x, event.y, width, height, *bounds)
 
-        print(f"Pixel coords: ({x}, {y})")
-        print(f"Complex value: {c}")
+        # Calculathe the xoom bounds around center
+        bounds = calculate_zoom_bounds(center, *bounds, zoom_factor=2)
+
+        render_mandelbrot_rows(image,width,height,max_iter, bounds)
+
+        print(f"Current bounds: {bounds}")
 
     canvas.bind("<Button-1>", handle_click)
 
