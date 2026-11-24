@@ -9,6 +9,8 @@ def draw_mandelbrot():
     height = 500
     max_iter = 100
 
+    bounds = (-2.0, 1.0, -1.5, 1.5)
+
     root = tk.Tk()
     root.title("Mandelbrot Explorer")
     root.geometry("800x800")
@@ -16,11 +18,11 @@ def draw_mandelbrot():
     # Create and pack a Canvas
     canvas = tk.Canvas(root, width=width, height=height, background="white")
     canvas.pack()
-
+ 
     # Create a PhotoImage matching the canvas dimensions
     image = tk.PhotoImage(width=width, height=height)
 
-    render_mandelbrot_rows(image,width,height,max_iter)
+    render_mandelbrot_rows(image,width,height,max_iter, bounds)
 
     # Display the PhotoImage to the Canvas
     canvas.create_image(0,0,image=image, anchor="nw")
@@ -41,7 +43,7 @@ def draw_mandelbrot():
         y = event.y
 
         # Convert to complex number
-        c = pixel_to_complex(x, y, width, height)
+        c = pixel_to_complex(x, y, width, height, *bounds)
 
         print(f"Pixel coords: ({x}, {y})")
         print(f"Complex value: {c}")
