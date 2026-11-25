@@ -1,56 +1,13 @@
 import tkinter as tk
-from funcs import render_mandelbrot_rows, pixel_to_complex, calculate_zoom_bounds, escape_iterations, escape_to_color
+from funcs import pixel_to_complex, calculate_zoom_bounds, render_mandelbrot_batches
 
-def render_mandelbrot_batches(
-    root, image, width, height, max_iter, bounds, batch_size=5
-):
-    """
-    Render the Mandelbrot image in small batches of rows.
-
-    Args:
-        root (tk.Tk): Tkinter application window.
-        image (tk.PhotoImage): Image to populate.
-        width (int): Image width in pixels.
-        height (int): Image height in pixels.
-        max_iter (int): Maximum Mandelbrot iterations.
-        bounds (tuple): Current complex-plane boundaries.
-        batch_size (int): Number of rows to render per batch.
-    """
-    current_row = 0
-
-    def render_next_batch():
-        """Render the next batch and schedule remaining rows."""
-        nonlocal current_row
-
-        # Determine which row this batch should end at
-        end_row = min(current_row + batch_size, height)
-
-        # Loop from current_row to the end of this batch.
-        for y in range(current_row, end_row):
-            row_colors = []
-
-            for x in range(width):
-                c = pixel_to_complex(x, y, width, height, *bounds)
-                escape = escape_iterations(c,max_iter)
-                color = escape_to_color(escape,max_iter)
-                
-                row_colors.append(color)
-
-            image.put("{" + " ".join(row_colors) + "}", to=(0, y))
-
-        current_row = end_row
-
-        if current_row < height:
-            root.after(1, render_next_batch)
-
-    render_next_batch()
 
 def draw_mandelbrot():
     """
         Render a color-based Mandelbrot set in a Tkinter window based on escape time
     """
-    width = 500
-    height = 500
+    width = 800
+    height = 800
     max_iter = 100
 
     initial_bounds = (-2.0, 1.0, -1.5, 1.5)
@@ -59,21 +16,23 @@ def draw_mandelbrot():
 
     root = tk.Tk()
     root.title("Mandelbrot Explorer")
-    root.geometry("800x800")
+    root.geometry("1000x1000")
+    root.render_id = 0
+    
+    # Create a PhotoImage matching the canvas dimensions
+    image = tk.PhotoImage(width=width, height=height)
 
     # Create and pack a Canvas
     canvas = tk.Canvas(root, width=width, height=height, background="white")
     canvas.pack()
  
-    # Create a PhotoImage matching the canvas dimensions
-    image = tk.PhotoImage(width=width, height=height)
-
-    render_mandelbrot_rows(image,width,height,max_iter, bounds)
-
     # Display the PhotoImage to the Canvas
     canvas.create_image(0,0,image=image, anchor="nw")
     # Keep a reference to the image
     canvas.image = image
+
+    render_mandelbrot_batches(root,image,width,height,max_iter,bounds)
+    
 
     def handle_click(event):
         """
@@ -90,7 +49,7 @@ def draw_mandelbrot():
         # Calculathe the xoom bounds around center
         bounds = calculate_zoom_bounds(center, *bounds, zoom_factor=2)
 
-        render_mandelbrot_rows(image,width,height,max_iter, bounds)
+        render_mandelbrot_batches(root,image,width,height,max_iter,bounds)
 
         print(f"Current bounds: {bounds}")
 
@@ -111,7 +70,7 @@ def draw_mandelbrot():
         # Calculate new bounds using zoomfactor=0.5
         bounds = calculate_zoom_bounds(center, *bounds, zoom_factor=0.5)
 
-        render_mandelbrot_rows(image, width, height, max_iter, bounds)
+        render_mandelbrot_batches(root,image,width,height,max_iter,bounds)
 
     canvas.bind("<Button-3>", handle_right_click)
 
@@ -126,7 +85,8 @@ def draw_mandelbrot():
         bounds = initial_bounds
 
         # Redraw the mandelbrot image
-        render_mandelbrot_rows(image, width, height, max_iter, bounds)
+        # render_mandelbrot_rows(image, width, height, max_iter, bounds)
+        render_mandelbrot_batches(root,image,width,height,max_iter,bounds)
 
     # Create a reset button
     reset_button = tk.Button(root, text="Reset View", command=reset_view)

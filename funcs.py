@@ -33,7 +33,7 @@ def escape_iterations(c, max_iter):
     z = 0
 
     # Validate iteration count
-    if max_iter <= 0 or not isinstance(max_iter, int):
+    if type(max_iter) is not int or max_iter <= 0:
         raise ValueError("Iteration count must be a positive integer")
         
     for i in range(1, max_iter + 1):
@@ -84,13 +84,13 @@ def escape_to_color(escape, max_iter):
     Returns:
         str: A Tkinter-compatible hexadecimal colour.
     """
-    if escape is None:
-        return "#000000"
-
     # Validate iteration count
     if max_iter <= 0 or not isinstance(max_iter, int):
         raise ValueError("Iteration count must be a positive integer")
     
+    if escape is None:
+        return "#000000"
+
     # Normalize escape time to a value between 0 and 1
     norm_escape = escape / max_iter
 
@@ -131,26 +131,6 @@ def render_mandelbrot_rows(image,width,height,max_iter, bounds):
         # Write the entire row to image
         image.put(row_data, to=(0, y))
 
-def handle_click(event):
-    """
-    Handle a left mouse click on the Mandelbrot Canvas.
-
-    Args:
-        event: Tkinter mouse event containing click coordinates.
-    """
-    # Get the pixel coordinte from the event
-    x = event.x
-    y = event.y
-    width = event.x_root
-    height = event.y_root
-
-    # Convert to complex number
-    c = pixel_to_complex(x, y, width, height)
-
-    print(f"Complex value: {c}")
-    print(f"Pixel coords: ({event.x}, {event.y})")
-    print(f"Screen coords: ({event.x_root}, {event.y_root})")
-
 def calculate_zoom_bounds(center, real_min, real_max, imag_min, imag_max, zoom_factor):
     """
     Calculate new complex-plane boundaries after zooming.
@@ -190,3 +170,64 @@ def calculate_zoom_bounds(center, real_min, real_max, imag_min, imag_max, zoom_f
 
     return (new_real_min, new_real_max, new_imag_min, new_imag_max)
 
+def render_mandelbrot_batches(
+    root, image, width, height, max_iter, bounds, batch_size=5
+):
+    """
+    Render Mandelbrot rows in batches, cancelling outdated renders.
+
+    Each new rendering request invalidates previously scheduled batches
+
+    Args:
+        root (tk.Tk): Tkinter application window.
+        image (tk.PhotoImage): Image to populate.
+        width (int): Image width in pixels.
+        height (int): Image height in pixels.
+        max_iter (int): Maximum Mandelbrot iterations.
+        bounds (tuple): Current complex-plane boundaries.
+        batch_size (int): Number of rows to render per batch.
+    """
+    if type(batch_size) is not int or batch_size <= 0:
+        raise ValueError("Batch size must be a positive integer")
+
+    # Increment root.render_id.
+    # Assume root.render_id was initialized to 0 when
+    # the application window was created.
+    root.render_id += 1
+
+    # Store the current render ID
+    my_render_id = root.render_id
+
+    #image.put("black", to=(0,0, width, height))
+
+    current_row = 0
+
+    def render_next_batch():
+        """Render the next batch only if this render is current."""
+        nonlocal current_row
+
+        if my_render_id != root.render_id:
+            return
+
+        # Determine which row this batch should end at
+        end_row = min(current_row + batch_size, height)
+
+        # Loop from current_row to the end of this batch.
+        for y in range(current_row, end_row):
+            row_colors = []
+
+            for x in range(width):
+                c = pixel_to_complex(x, y, width, height, *bounds)
+                escape = escape_iterations(c,max_iter)
+                color = escape_to_color(escape,max_iter)
+
+                row_colors.append(color)
+
+            image.put("{" + " ".join(row_colors) + "}", to=(0, y))
+
+        current_row = end_row
+
+        if current_row < height:
+            root.after(1, render_next_batch)
+
+    render_next_batch()
