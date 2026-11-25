@@ -1,5 +1,49 @@
 import tkinter as tk
-from funcs import render_mandelbrot_rows, pixel_to_complex, calculate_zoom_bounds
+from funcs import render_mandelbrot_rows, pixel_to_complex, calculate_zoom_bounds, escape_iterations, escape_to_color
+
+def render_mandelbrot_batches(
+    root, image, width, height, max_iter, bounds, batch_size=5
+):
+    """
+    Render the Mandelbrot image in small batches of rows.
+
+    Args:
+        root (tk.Tk): Tkinter application window.
+        image (tk.PhotoImage): Image to populate.
+        width (int): Image width in pixels.
+        height (int): Image height in pixels.
+        max_iter (int): Maximum Mandelbrot iterations.
+        bounds (tuple): Current complex-plane boundaries.
+        batch_size (int): Number of rows to render per batch.
+    """
+    current_row = 0
+
+    def render_next_batch():
+        """Render the next batch and schedule remaining rows."""
+        nonlocal current_row
+
+        # Determine which row this batch should end at
+        end_row = min(current_row + batch_size, height)
+
+        # Loop from current_row to the end of this batch.
+        for y in range(current_row, end_row):
+            row_colors = []
+
+            for x in range(width):
+                c = pixel_to_complex(x, y, width, height, *bounds)
+                escape = escape_iterations(c,max_iter)
+                color = escape_to_color(escape,max_iter)
+                
+                row_colors.append(color)
+
+            image.put("{" + " ".join(row_colors) + "}", to=(0, y))
+
+        current_row = end_row
+
+        if current_row < height:
+            root.after(1, render_next_batch)
+
+    render_next_batch()
 
 def draw_mandelbrot():
     """
